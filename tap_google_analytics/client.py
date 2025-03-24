@@ -249,6 +249,9 @@ class GoogleAnalyticsStream(Stream):
 
                 record[metric_name] = value
 
+            # Add the property_id to each record. This is used to identify the property in the API response so that we can load multiple properties in the same sync eventually.
+            record["property_id"] = f"properties/{self.property_id}"
+
             # Also add the [start_date,end_date) used for the report
             record["report_start_date"] = self.config.get("start_date")
             record["report_end_date"] = self.end_date
@@ -346,9 +349,11 @@ class GoogleAnalyticsStream(Stream):
                 "metric", metric, self.dimensions_ref, self.metrics_ref
             )
             properties.append(th.Property(metric, self._get_datatype(data_type)))
+            primary_keys.append("property_id")
 
         properties.extend(
             (
+                th.Property("property_id", th.StringType(), required=True),
                 th.Property("report_start_date", th.StringType(), required=True),
                 th.Property("report_end_date", th.StringType(), required=True),
             )
