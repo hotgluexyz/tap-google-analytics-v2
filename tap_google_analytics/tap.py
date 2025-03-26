@@ -18,6 +18,7 @@ from google.oauth2 import service_account
 from google.oauth2.credentials import Credentials as OAuthCredentials
 from singer_sdk import Stream, Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
+from datetime import datetime, timedelta, timezone
 
 from tap_google_analytics.client import GoogleAnalyticsStream
 
@@ -30,14 +31,10 @@ class TapGoogleAnalytics(Tap):
     """Singer tap for extracting data from the Google Analytics Data API (GA4)."""
 
     name = "tap-google-analytics"
+    _end_date = datetime.now(timezone.utc).date()
+    _start_date = _end_date - timedelta(days=30)
 
     config_jsonschema = th.PropertiesList(
-        th.Property(
-            "start_date",
-            th.DateTimeType,
-            description="The earliest record date to sync",
-            required=True,
-        ),
         th.Property(
             "property_id",
             th.StringType,
@@ -112,9 +109,16 @@ class TapGoogleAnalytics(Tap):
             description="List of Google Analytics Reports Definitions",
         ),
         th.Property(
+            "start_date",
+            th.DateTimeType,
+            description="The earliest record date to sync",
+            default=_start_date.isoformat()
+        ),
+        th.Property(
             "end_date",
             th.StringType,
             description="The last record date to sync",
+            default=_end_date.isoformat(),
         ),
     ).to_dict()
 
