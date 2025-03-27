@@ -123,14 +123,15 @@ class TapGoogleAnalytics(Tap):
     ).to_dict()
 
     def _initialize_credentials(self):
-        if self.config.get("oauth_credentials"):
+        if self.config.get("client_id") and self.config.get("client_secret") and self.config.get("refresh_token"):
             return OAuthCredentials.from_authorized_user_info(
                 {
-                    "client_id": self.config["oauth_credentials"]["client_id"],
-                    "client_secret": self.config["oauth_credentials"]["client_secret"],
-                    "refresh_token": self.config["oauth_credentials"]["refresh_token"],
+                    "client_id": self.config["client_id"],
+                    "client_secret": self.config["client_secret"],
+                    "refresh_token": self.config["refresh_token"],
                 }
             )
+
 
         if self.config.get("key_file_location"):
             with open(self.config["key_file_location"]) as f:  # noqa: PTH123
