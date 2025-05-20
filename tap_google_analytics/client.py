@@ -7,6 +7,7 @@ import functools
 import sys
 import typing as t
 from datetime import date, datetime, timedelta, timezone
+import uuid
 
 import backoff
 from google.analytics.data_v1beta.types import (
@@ -33,6 +34,8 @@ if sys.version_info < (3, 11):
 class GoogleAnalyticsStream(Stream):
     """Stream class for GoogleAnalytics streams."""
 
+    _shared_run_id = None  # Class variable to store the run_id shared across all streams
+
     def __init__(self, *args, **kwargs) -> None:
         """Init GoogleAnalyticsStream."""
         self.report = kwargs.pop("ga_report")
@@ -50,6 +53,17 @@ class GoogleAnalyticsStream(Stream):
             self.property_ids = [self.config["property_id"]]
         self.page_size = 100000
         self.quota_manager = QuotaManager()
+
+        # Generate a unique run_id for this tap run if not already set
+        if GoogleAnalyticsStream._shared_run_id is None:
+            GoogleAnalyticsStream._shared_run_id = (
+                f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:8]}"
+            )
+
+    @property
+    def run_id(self) -> str:
+        """Return the unique run_id for this tap run."""
+        return GoogleAnalyticsStream._shared_run_id
 
     def _get_end_date(self):
         end_date_config = self.config.get("end_date")
@@ -295,6 +309,9 @@ class GoogleAnalyticsStream(Stream):
             record["report_start_date"] = self.config.get("start_date")
             record["report_end_date"] = self.end_date
 
+            # Add run_id to every record
+            record["run_id"] = self.run_id
+
             yield record
 
     @backoff.on_exception(backoff.expo, (Exception), max_tries=5, giveup=is_fatal_error)
@@ -397,6 +414,7 @@ class GoogleAnalyticsStream(Stream):
                 th.Property("property_id", th.StringType(), required=True),
                 th.Property("report_start_date", th.StringType(), required=True),
                 th.Property("report_end_date", th.StringType(), required=True),
+                th.Property("run_id", th.StringType(), required=True),
             )
         )
         # If 'ga:date' has not been added as a Dimension, add the
