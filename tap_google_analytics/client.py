@@ -56,9 +56,7 @@ class GoogleAnalyticsStream(Stream):
 
         # Generate a unique run_id for this tap run if not already set
         if GoogleAnalyticsStream._shared_run_id is None:
-            GoogleAnalyticsStream._shared_run_id = (
-                f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:8]}"
-            )
+            GoogleAnalyticsStream._shared_run_id = int(datetime.now().timestamp() * 1000)
 
     @property
     def run_id(self) -> str:
@@ -414,7 +412,7 @@ class GoogleAnalyticsStream(Stream):
                 th.Property("property_id", th.StringType(), required=True),
                 th.Property("report_start_date", th.StringType(), required=True),
                 th.Property("report_end_date", th.StringType(), required=True),
-                th.Property("run_id", th.StringType(), required=True),
+                th.Property("run_id", th.IntegerType(), required=True),
             )
         )
         # If 'ga:date' has not been added as a Dimension, add the
