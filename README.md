@@ -29,6 +29,7 @@ Built with the [Meltano Singer SDK](https://sdk.meltano.com).
 | stream_map_config   | False    | None    | User-defined config values to be used within map expressions. |
 | flattening_enabled  | False    | None    | 'True' to enable schema flattening and automatically expand nested properties. |
 | flattening_max_depth| False    | None    | The max depth to flatten schemas. |
+| lookback_window     | False    | 30      | Number of days to lookback for incremental syncs. This helps ensure data completeness by accounting for potential delays in Google Analytics data processing. |
 
 A full list of supported settings and capabilities is available by running: `tap-google-analytics --about`
 
