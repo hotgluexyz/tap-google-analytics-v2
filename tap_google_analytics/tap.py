@@ -44,7 +44,6 @@ class TapGoogleAnalytics(Tap):
             "property_ids",
             th.StringType,
             description="List of Google Analytics Property IDs",
-            required=True,
         ),
         # Service Account
         th.Property(
