@@ -191,7 +191,7 @@ class TapGoogleAnalytics(Tap):
             property_id = self.config["property_id"]
         
         if not property_id:
-            raise RuntimeError("No valid property ID provided")
+            raise RuntimeError("No property_id or property_ids provided in config, please provide one of them.")
 
         request = GetMetadataRequest(name=f"properties/{property_id}/metadata")
         results = self.analytics.get_metadata(request)
