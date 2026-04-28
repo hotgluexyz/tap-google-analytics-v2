@@ -348,9 +348,6 @@ class GoogleAnalyticsStream(Stream):
                     )
                     self.quota_manager.wait_for_quota_reset()
                     continue
-                
-                single_line = " ".join(str(e).split())
-                e.args = (single_line,)
                 raise
 
     @staticmethod

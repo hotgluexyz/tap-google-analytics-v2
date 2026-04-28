@@ -85,7 +85,7 @@ def is_fatal_error(error):
         return False
 
     status = error.code if error.message is not None else None
-    if status is not None and 500 <= status < 600:
+    if status in [500, 503]:
         return False
 
     # Use list of errors defined in:
