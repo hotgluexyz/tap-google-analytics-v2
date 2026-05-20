@@ -174,14 +174,27 @@ class GoogleAnalyticsStream(Stream):
             # If that fails, try parsing as YYYY-MM-DD
             parsed = date.fromisoformat(state_bookmark)
         
-        
         # Only apply lookback window if we have a state bookmark
         if state.get("replication_key_value"):
             lookback_window = self.config.get("lookback_window", 30)
             parsed = parsed - timedelta(days=lookback_window)
         
         #lookback still need to respect the min value of google.api_core
-        parsed = max(parsed, date(2015, 8, 14))
+        ga_min_start_date = date(2015, 8, 14)
+        if parsed < ga_min_start_date:
+            if not state.get("replication_key_value"):
+                #using self.config["start_date"]
+                msg = f"Configured start_date = {parsed}"
+            else:
+                #using replication_key_value
+                msg = f"Computed start date = {parsed} (replication_key_value - lookback_window ({lookback_window}))"
+                
+            msg = (
+                f"{msg} is earlier than GA minimum; "
+                f"using GA minimum {ga_min_start_date.isoformat()}."
+            )
+            self.logger.warning(msg)
+            parsed = ga_min_start_date
         
         # state bookmarks need to be reformatted for API requests
         return date.strftime(parsed, "%Y-%m-%d")
